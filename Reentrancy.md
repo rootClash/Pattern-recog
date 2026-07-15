@@ -1,4 +1,4 @@
-## PoC: Missing Nonce
+## PoC: 
 missing global mutex
 
 ### Pattern
@@ -25,3 +25,27 @@ whenever you see ERC20 .transfer() then always check whether the token being use
 add the centeral Reenterancy guard and also check the state changes during the call (that is importnat)
 
 ``------------------------------------------------------------------------------``
+## PoC: 
+viloation of CEI pattern
+
+### Pattern
+cross function Reentrancy
+
+### Root Cause
+viloation of CEI pattern lead to drainage of protocol
+
+### Assumption
+after the lockTime Pass on their current lock,  the user can split the lock   
+overpayment trigger refund
+
+### Broken Invariant
+Sum of all lock amounts in the Locker vault == Total ERC20 tokens held by the Locker contract
+
+### Attack Story
+attacker owned the asset in Locker as Token => attacker call split the lock when he havent withdrawn the last locker => attacker overpaid the eth => eth was transfered to user before state update => lead to reentrancy => attacker called withdraw and pull out the all asset => and then state varaible change with the current asset new lock was created.
+
+### Checklist
+follow cei pattern that is important
+
+### Mitigation
+use Reentrancy guard.
