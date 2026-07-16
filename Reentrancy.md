@@ -77,3 +77,30 @@ user called the tesseraSwapWithCallback() function => added the amountOut and am
 ### Mitigation
 -> use CEI pattern.
 
+``---------------------------------------------------------------------------``
+## PoC: CEI VIOLATION
+
+### Pattern
+read only reentracy
+
+### Root Cause
+violation of CEI pattern
+
+### Assumption
+-> user has lpTokens
+-> lpTokens approved for burn
+-> tokens are received proportionally
+
+### Broken Invariant
+=> reserve value does not update after the burn and transfer 
+
+### Attack Story
+attacker call the removeLiquidity => burn its lpmtoken on the basic of current price =>
+after transfer => as the preserve price is not updated => attacker buy at the same stale price => or check which protocol use the Beanstalk walls for reserve price => and buy at less price.
+### Checklist
+=> follow the reentrancy guard  
+=> never belive on view function 
+
+### Mitigation
+=> follow the reentrancy guard
+=> keep the eye on view function
