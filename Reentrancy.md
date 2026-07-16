@@ -49,3 +49,31 @@ follow cei pattern that is important
 
 ### Mitigation
 use Reentrancy guard.
+
+``--------------------------------------------------------------------------------``
+## PoC: Voliation of CEI 
+
+### Pattern
+logic 
+
+### Root Cause
+violation of CEI pattern
+
+### Assumption
+-> no working capital needed 
+-> amount will be send to the trusted user 
+-> The price of the asset in market assumed to be same
+
+### Broken Invariant
+=> the price of the asset in market is same but The attacker didn't break an invariant (like a mathematical property that should always hold). Instead, they exploited a logic bug in the contract's execution flow.
+
+### Attack Story
+user called the tesseraSwapWithCallback() function => added the amountOut and amountIn => inside the user callback function => it buys the input asset from the another exchange at low price then this Tessera Engine => pay back the input asset => and gain some profit. the attacker loop this more than 100 times.
+
+### Checklist
+-> undestand the flow how the flow should work.
+-> sometimes without invariant break the protocol can be drained.
+
+### Mitigation
+-> use CEI pattern.
+
