@@ -31,3 +31,32 @@ The protocol's recorded bid amount should always equal the actual token balance 
 - Verify the actual amount received by comparing the contract's token balance before and after `transferFrom()`.
 - Update the protocol's accounting using the actual amount received. (VIP)
 - Alternatively, explicitly reject unsupported ERC20 tokens such as fee-on-transfer tokens.
+
+``----------------------------------------------------------------------------------------------------------``
+# PoC: Protocol Assumes ERC20 Transfers Are 1:1
+
+## pattern
+The protocol assumes that `transferFrom` does not cut fees and value are pegged 1 : 1
+
+## Root Cause
+using the weird ERC20 token which collect fees
+
+## broken Invariant
+token received == token transfered
+
+## Attack story
+1. Attacker depoit the amoun and the transfer the token.
+2  In the same function the reward is set on the basis of amount parameter through function.
+3. when the user claim the reward , the function received (amount - fee) from the and the reward was set on the
+user input. 
+4. so user could not able to claim the rewards.
+
+## Checklist
+- Does the function use ERC20 token transfer?
+- Does internal accounting before and after are done?
+- Does protocol support fee-on-transfer, rebasing, or other non-standard ERC20 tokens?
+
+## Mitigations
+- Verify the actual amount received by comparing the contract's token balance before and after `transferFrom()`.
+- Update the protocol's accounting using the actual amount received. (VIP)
+- Alternatively, explicitly reject unsupported ERC20 tokens such as fee-on-transfer tokens.
