@@ -26,7 +26,7 @@ add the centeral Reenterancy guard and also check the state changes during the c
 
 ``------------------------------------------------------------------------------``
 ## PoC: 
-viloation of CEI pattern
+viloation of CEI pattern    
 
 ### Pattern
 cross function Reentrancy
@@ -104,3 +104,29 @@ after transfer => as the preserve price is not updated => attacker buy at the sa
 ### Mitigation
 => follow the reentrancy guard
 => keep the eye on view function
+
+```---------------------------------------------------------------------------------```
+## PoC: 
+total supply token does not update in `BalancerVault`
+
+### Pattern
+read only Reentrancy
+
+### Root Cause
+`BalancerPairOracle.getPrice` does not update the total token reserve
+
+### Assumption
+The BalanceVault contract provide the current updated reserve 
+
+### Broken Invariant
+LP Price × LP Total Supply = Total Economic Value of the Pool
+
+### Attack Story
+attaker use the Flash loan => used the asset  to join => which lead to renter the contract => then call lquidate => which envoked getPrice function => but the previous total token was not updated => whereas the total supply of LP token did => in the end the attacker used the last token price => and drained the protocol.
+
+### Checklist
+never beleive on getter function which act as calculator. 
+
+### Mitigation
+-> use reentrancy guard in getter function.
+-> use verfied oracle.
