@@ -60,3 +60,40 @@ user input.
 - Verify the actual amount received by comparing the contract's token balance before and after `transferFrom()`.
 - Update the protocol's accounting using the actual amount received. (VIP)
 - Alternatively, explicitly reject unsupported ERC20 tokens such as fee-on-transfer tokens.
+
+``----------------------------------------------------------------------------------------``
+# PoC: Approval checking is different in some ERC20
+
+## pattern
+non standard token
+
+## Root Cause
+approval check in USDC is different. in that first allowance should be set 0
+
+## broken Invariant
+Approval logic is same : all erc are same
+
+## Attack story
+1. set the token for reward
+2  but user approved the allowance to someone with some value (not zero)
+3. But the token was USDC and the approval in that token is different 
+4. the user cannot able to claim the reward.
+
+
+## Checklist
+- What type of ERC20 token can be used?
+- Does forceApprove() is used?
+- Does it first reset allowance?
+- Is the protocol allowlisting tokens?
+Search Patterns
+
+Whenever auditing, grep for
+
+approve(
+safeApprove(
+forceApprove(
+increaseAllowance(
+decreaseAllowance(
+## Mitigations
+- Use SafeERC20's forceApprove method instead to support all the ERC20 tokens.
+
