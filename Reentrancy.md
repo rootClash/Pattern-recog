@@ -158,3 +158,28 @@ attacker register the BLB key => add the 4eth token as a stake => call the `with
 ### Mitigation
 - use CEI pattern
 - proper accounting of asset
+
+``------------------------------------------------------------------------------------------------------``
+## PoC: Missing cross contract Reentranct (Medium)
+
+### Pattern
+Cross contract Reentrancy with (ERC721)
+
+### Root Cause
+Missing Reentrancy check
+
+### Assumption
+No user have buyed the NFT
+
+### Broken Invariant
+One NFT for single userid
+
+### Attack Story
+inside the `mintPublic` function => `bytes feeRecepient` parameter is there => attacker firt time use ETH fee recepiet +> got one NFT => use another though the ERC721 hook => using USDC fee Receipt => got another.
+
+### Checklist
+- follow CEI pattern?
+
+### Mitigation
+- use Reentrancy guard and CEI pattern
+- aware about the Type of hooks Token
