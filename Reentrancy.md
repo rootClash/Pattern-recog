@@ -130,3 +130,31 @@ never beleive on getter function which act as calculator.
 ### Mitigation
 -> use reentrancy guard in getter function.
 -> use verfied oracle.
+
+
+``----------------------------------------------------------------------------``
+## PoC: Missing Reentrancy guard lead to Cross contract Reentrancy and DOS attack
+
+### Pattern
+Cross contract Reentrancy + DOS attack from user side
+
+### Root Cause
+Violation of CEI pattern + no Proper accounting
+
+### Assumption
+proper accouting of eth deposit from both the Node runner and  User side.
+
+### Broken Invariant
+sum of all ETH deposited by the node runner Through registerd BLB key == eth Deposited to the vault Through Registered BLB key.
+
+### Attack Story
+attacker register the BLB key => add the 4eth token as a stake => call the `withdrawEthForKnot()` => this function violates the CEI pattern => as the result the attacker reEnter through this => 4 eth back to the attacker => then through receive => reenter stake brcause of again viloation of CEI patteren => and vault return the user deposited amount to attacker => then attacker address get BLOCKED => now when user call mintLpToken or burn or withdraw => it revert sign of DOS attack
+
+### Checklist
+- do the proper accounting are done?
+- does the function using external call follow CEI pattern?
+- does it have Reentracy guard?
+
+### Mitigation
+- use CEI pattern
+- proper accounting of asset
