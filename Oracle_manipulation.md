@@ -25,3 +25,29 @@ which calcualted the spot price from the single pool please investigate that
 ### Mitigation
 -> use TWAp
 -> use external oracle like chainlink
+
+``----------------------------------------------------------------------------------------------``
+## PoC: Balance oracle is not updated regularly
+
+### Pattern
+TWAP implementation issue
+
+### Root Cause
+The balance oracle was not updating the price frequently
+
+### Assumption
+The price is updated regularly in balancer oracle
+
+### Broken Invariant
+The price is updated 
+
+### Attack Story
+The price is updated after swap function => not so much trasaction => window is small => which mean the price is not updated regulary => the attacker can use this time period => when the eth price in market is low => and high in this oracle due to no updation of price .
+
+### Checklist
+- When does the oracle update?
+- Is the assumption valid?
+- Can the returned price become incorrect?
+
+### Mitigation
+use the good oracle resource like : chainlink
