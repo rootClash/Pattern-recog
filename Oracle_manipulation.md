@@ -51,3 +51,40 @@ The price is updated after swap function => not so much trasaction => window is 
 
 ### Mitigation
 use the good oracle resource like : chainlink
+
+``-----------------------------------------------------------------------------------------------------------------------------``
+## PoC: Uniswap price can be Manipulated
+
+### Pattern
+Multiple Hopes + low Liquidity + small window  
+
+### Root Cause
+Due to Low lqiuidity and using such collateral with multiple pair with addition of small TWAP window lead
+to the price manipulation
+
+### Assumption
+trusting the Oracle
+collateral in Pools are enough to provide the fair price
+
+### Broken Invariant
+The Protocol has enough liquidity to provide sufficent liquidity with no price manipulation
+
+
+### Attack Story
+due to less liquidity => attacker can use the large flash loan for temproperay purpose => and manipulate the price => and also take the advantage of small TWAP => then liquidate the provide with profit
+
+### Checklist
+- check the TWAP implementation?
+- does the window is short?
+- does the liuqidity is less pool?
+- are both pool and TWAP price is matchinhg ? (according to the market)
+
+⭐ External Market Price
+        ≈
+Oracle Price (very important)
+
+### Mitigation
+- use large TWAP window
+- correct TWAP implementation
+- observe the liquidity in pool
+- compare the external market price and oracle price
