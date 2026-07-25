@@ -111,6 +111,9 @@ due to, wrong price method the valutaion of BPT stable price increases more than
 ### Checklist
 the function that provide price , does it check reentrancy ?
 - how it calulate the price?
+- natspec should match your implementation
+
+
 
 ### Mitigation
 - use different price method 
@@ -135,6 +138,34 @@ Attacker can use this to liquidate the Healthy positon and profit it from it
 
 ### Checklist
 - always check how price is calculated?
+- natspec should match your implementation
 
 ### Mitigation
 - Dont divide by the value of ETH
+
+```---------------------------------------------------------------------------------------------```
+## PoC: ERC4626 is vulnerbale to price manipulation
+
+### Pattern
+ERC4626Oracle is vulnerable to price manipulation
+
+### Root Cause
+using priceRedeem();
+
+### Assumption
+ERC6426Oracle provide the valid price
+
+### Broken Invariant
+Deposite >= shares
+
+### Attack Story
+attacker is flash loan -> chage the price in Oracle => previewRedeem changes => oracle read
+manipulated price => protocl accept fake colloteral => can borrow large amount of assets  and also can liquidate other
+
+### Checklist
+-ERC4626 is used ?
+- does it used as ERC4626 oracle?
+- does it user any other way to calculate the price?
+
+### Mitigation
+- does not use previewRedeem function use TWAP
