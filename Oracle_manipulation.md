@@ -13,7 +13,7 @@ The collateral value of LP provider should not loose the economic value of the p
 Trusting the Pool for the fair market 
 
 ### Attack Story
-attacker will borrow loan 
+attacker will borrow loan => and use the small window as a attacking approch.
 
 ### Checklist
 whenver you find any function related like
@@ -81,10 +81,60 @@ due to less liquidity => attacker can use the large flash loan for temproperay p
 
 ⭐ External Market Price
         ≈
-Oracle Price (very important)
+Oracle Price (very important) (almost equal)
 
 ### Mitigation
 - use large TWAP window
 - correct TWAP implementation
 - observe the liquidity in pool
 - compare the external market price and oracle price
+
+```-------------------------------------------------------------------------------------------------------------------------------------------------------```
+## PoC: Wrong Method to Calculate the Price
+
+### Pattern
+Incorrect LP Valuation
+
+### Root Cause
+using the Price methodelogy to calculate the price 
+
+### Assumption
+The Orcale will calulate the price 
+
+### Broken Invariant
+Borrower > debt
+
+### Attack Story
+There is no such profit to attacker but The protocol will go under the high debt /Insolvency .
+due to, wrong price method the valutaion of BPT stable price increases more than expected 
+
+### Checklist
+the function that provide price , does it check reentrancy ?
+- how it calulate the price?
+
+### Mitigation
+- use different price method 
+
+```---------------------------------------------------------------------------------------------------------------------------------```
+## PoC: Mistakely calcualte the value of LP in terms of ETH
+
+### Pattern
+Incorrect LP Valuation
+
+### Root Cause
+mistakely calculates the value of Liquidity pool in terms of ETH
+
+### Assumption
+LP pool return correct value
+
+### Broken Invariant
+Healthy position will liquidate due to incorrect pricising
+
+### Attack Story
+Attacker can use this to liquidate the Healthy positon and profit it from it
+
+### Checklist
+- always check how price is calculated?
+
+### Mitigation
+- Dont divide by the value of ETH
