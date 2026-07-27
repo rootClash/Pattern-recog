@@ -131,7 +131,7 @@ mistakely calculates the value of Liquidity pool in terms of ETH
 LP pool return correct value
 
 ### Broken Invariant
-Healthy position will liquidate due to incorrect pricising
+Healthy position cannot be liquidated
 
 ### Attack Story
 Attacker can use this to liquidate the Healthy positon and profit it from it
@@ -159,13 +159,48 @@ ERC6426Oracle provide the valid price
 Deposite >= shares
 
 ### Attack Story
-attacker is flash loan -> chage the price in Oracle => previewRedeem changes => oracle read
+attacker is flash loan -> change the price in Oracle => previewRedeem changes => oracle read
 manipulated price => protocl accept fake colloteral => can borrow large amount of assets  and also can liquidate other
 
 ### Checklist
--ERC4626 is used ?
+-ERC4626Oracle is used ?
 - does it used as ERC4626 oracle?
 - does it user any other way to calculate the price?
 
 ### Mitigation
 - does not use previewRedeem function use TWAP
+
+
+## PoC: Curve virtual_price Read-Only Reentrancy
+
+**Pattern**
+A `view` function gets called mid-transaction, while the contract is only half-updated — so it returns a wrong value.
+
+**Root Cause**
+Curve's `remove_liquidity()` sends ETH out *before* updating its internal balances. That gap is the bug.
+
+**Assumption**
+Sentiment assumed `get_virtual_price()` always shows the true, settled price — because it's "just a view function."
+
+**Broken Invariant**
+`virtual_price` should always reflect a fully-settled pool. It doesn't — for a brief window mid-call, it's calculated from half-old, half-new numbers.
+
+**Attack Story**
+1. Attacker deposits ETH into Curve.
+2. Attacker calls `remove_liquidity()`.
+3. Curve sends ETH back first → attacker's contract regains control before balances update.
+4. Attacker calls Sentiment's `RiskEngine` right then — it reads a crashed `virtual_price`.
+5. Healthy accounts now look under-collateralized.
+6. Attacker liquidates them and keeps the premium.
+7. Curve call finishes, price goes back to normal, attacker cashes out.
+
+**Checklist**
+- Any view function combining state that updates at different times?
+- Is that view function trusted by another contract?
+- Can it be read from inside someone else's external call?
+- Could a flashloan make the manipulation big enough to matter?
+
+**Mitigation**
+- Best: fix Curve to update all balances *before* sending ETH (proper CEI).
+- Practical: before trusting the price, check the source isn't mid-reentrancy (e.g. a dummy call that reverts if its own lock is engaged).
+- Long-term: use a TWAP instead of a raw spot `view` value for anything this sensitive.
