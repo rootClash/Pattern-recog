@@ -183,3 +183,42 @@ inside the `mintPublic` function => `bytes feeRecepient` parameter is there => a
 ### Mitigation
 - use Reentrancy guard and CEI pattern
 - aware about the Type of hooks Token
+
+-------------------------------------------------------------------------------
+## PoC: unappropriate accounting and no reentrant guard lead to reentrancy 
+
+### Pattern
+Reentrancy + Stale Snapshot Pattern
+
+### Root Cause
+no reentrant guard in exteranl functions and allowing the multiple hop pool to make swap
+
+### Assumption
+-> function protected from reentrancy attack
+-> attacker has already has a positon
+-> withdrawing <= attacker balance
+
+### Broken Invariant
+s_yieldTokenBalance == vault balance
+
+### Attack Story
+-> attacker create a pool in uniswap (pool1 (yield asset <-> Malicious token) (malicious token <-> asset))
+-> attacker approve the malicious token to use by the lennding router
+-> attacker make a position in vault
+-> then call redeemNative() (this function does not have a reentrancy guard)
+-> inside that function _burnShares(). and that function is call the lending router _execcuteTrade() function which in result
+call the malicious token and the attacker use the callback to reentrer thorugh the initateWithdraw() inside that token contract and then 
+the N tokens are withdraw from the yield
+-> inisde that function s_yieldTokenBalance decreases
+-> once the function return to the _burnShares() 
+-> it again decrease that amount from the s_yieldTokenShares 
+
+### Checklist
+-> check for reentrancy guard in every external function
+-> check the accounting 
+
+### Mitigation
+-> add the nonReentrant guard inside the all the external function
+-> allow only the single hope swap : (because in multiple hopes the malicious token can be added)
+-> allow only those token from allowlist
+
