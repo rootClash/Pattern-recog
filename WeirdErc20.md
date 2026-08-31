@@ -97,3 +97,38 @@ decreaseAllowance(
 ## Mitigations
 - Use SafeERC20's forceApprove method instead to support all the ERC20 tokens.
 
+-----------------------------------------------------------------------
+## PoC: no check for quoteAmount before tranfer
+
+### Pattern 
+WEIRD ERC20
+
+### Root Cause
+-> no proper check after seding and reciveing the token 
+-> no check for the quote Amount
+
+### Assumption
+-> proper check of quote amount
+
+### Broken Invariant
+-> token send != token receive
+
+### Attack Story
+-> Alice use the rebase token for creating the auction
+    -> rebase token ka balance time ka sath change hota hai
+    -> Extra accured amount contract mein stuck ho jata hai
+
+-> Bob use the fee base token 
+    -> Bob 1 token bhejta hai , contract ko fee cut hone ka baad milta hai
+    -> Contract phir bhi 1 token ki accounting karta hai → withdrawal problem.
+
+### Checklist
+-> does the amount send is received by the contract
+-> does the token used is WEIRD ERC20
+
+### Mitigation
+-> its a creater reposibility to take accountibility
+-> the amount send == amount recived by the contract address (two seperate accounting should be done)
+-> amount transfered should be check before
+-> only allowed and whitlested token should be used
+
