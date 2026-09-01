@@ -47,3 +47,27 @@ y = X x C / z -> 2nd truncate
 ### Mitigation
 example with above redemetion : x = A x C / z x B
 this will reduce the truncation in one step but it can be scaled using 1e18 to preserve the value
+
+------------------------------------------------------------------
+## PoC: Fee Amount is lossing the Precision
+
+### Pattern
+Rounding ERROR
+
+### Root Cause
+divison before multiplication
+
+### Assumption
+-> no such context is provided where it calculated (_updatePseudoTotalAmounts())
+
+### Broken Invariant
+Fee is calculated properly
+
+### Attack Story
+-> protocol or lender will get less Fess
+
+### Checklist
+-> does the divsion is used or calcualted before multiplication
+
+### Mitigation
+-> multiplication before divison
