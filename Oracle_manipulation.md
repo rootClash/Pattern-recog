@@ -204,3 +204,37 @@ Sentiment assumed `get_virtual_price()` always shows the true, settled price —
 - Best: fix Curve to update all balances *before* sending ETH (proper CEI).
 - Practical: before trusting the price, check the source isn't mid-reentrancy (e.g. a dummy call that reverts if its own lock is engaged).
 - Long-term: use a TWAP instead of a raw spot `view` value for anything this sensitive.
+
+-------------------------------------------------------
+## PoC: Pumps are not updated in the shift() and sync function allowing the oracle manipulation
+
+### Pattern
+Oracle Manipulation
+
+### Root Cause
+internal accounting != well balance
+
+### Assumption
+-> shift caller is trusted
+-> token is valid (token is whitelisted)
+-> recpient is valid
+-> amount should greater  than zero
+
+### Broken Invariant
+-> internal accounting reserve shoud be equal to the actual token balance at the reserve
+
+### Attack Story
+-> attacker use the shift() inorder to shift the token/balance in the  current block 
+
+-> pump ka update behaviour manipulated reserve state ki wajah se exploitable hota hai.
+
+-> then use the swapFrom and swapTo inorder to add the manupilated price in the reserve and tranfer to the asser
+
+### Checklist
+-> doe shift() update the pump variable
+-> does shift() overwrite the last previous block?
+-> does swapFrom and swapTo update the Pump variable.
+-> can attacker can manipulate the same block-> with updated price -> and can recover the fund?
+
+### Mitigation
+-> update the price `Pump` in sync and shift function
