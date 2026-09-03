@@ -222,3 +222,29 @@ the N tokens are withdraw from the yield
 -> allow only the single hope swap : (because in multiple hopes the malicious token can be added)
 -> allow only those token from allowlist
 
+-------------------------------------------------------------------------
+## PoC: accounting does not sync betweent the Pool and vault
+
+### Pattern
+read only Reentrancy
+
+### Root Cause
+The Pool asset accounting was not matching the Vault accounting (not sync) as the result , getRate() is used as the Read only Reentrancy due to, providing the stale price
+
+### Assumption
+accounting between the vault and the Pool is matching
+
+### Broken Invariant
+During certain operations, Vault and Pool accounting can temporarily become inconsistent, allowing a reentrant caller to observe incorrect state.
+### Attack Story
+Attacker can use the Token callback and read the getRate() function to get the stale price of the vault.
+
+### Checklist
+-> Dont assume that view function are safe.
+-> check the accounting of connected contracts like (between the POOL and VAULT)
+
+### Mitigation
+-> convert that view to non-view (
+    but this does not solve the issue, becasue inside the current report , protocol are using governase. as the result, they have a power of stop the pool
+ ) so by adding the non view(exteranl) protocol gets the reliability to add nonReentrant guard to stop in critical situation. [READ ONLY REENTRACNY ARE VERY DIFFIULT TO MITIGATE]
+ 
