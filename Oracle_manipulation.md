@@ -238,3 +238,72 @@ internal accounting != well balance
 
 ### Mitigation
 -> update the price `Pump` in sync and shift function
+
+-----------------------------------------------------------------------
+## PoC: slot0 can be manipulated
+
+### Pattern
+Oracle Manipulation
+
+### Root Cause
+The slot price can be manipulated using oracle Manipulation
+
+### Assumption
+-> slot0 provide the safe price  and the pool is not manupilated.
+
+### Broken Invariant
+-> slot0 provide stale price after falsh inside the Pool.
+
+### Attack Story
+when the tick price is between the tick range. this happen using the reallocate() -> which call the other function to get the current slot0 price. and this slot0 could provide the stale price when the attacker manipulate the reserve. checks the current tick range -> swapForOutOfRange() . then update the current position. after that attacker removes the maniputlation. but till then the positon would have changed.
+
+### Checklist
+# Spot Price Manipulation — Audit Checklist
+
+Use this checklist whenever you see a protocol reading a DEX price.
+
+## 1. Identify the Price Source
+
+- [ ] Where does the price come from?
+  - [ ] Uniswap V2 `reserve0 / reserve1`
+  - [ ] Uniswap V3 `slot0()`
+  - [ ] `sqrtPriceX96`
+  - [ ] `tick`
+  - [ ] Another DEX / pool
+
+## 2. Check Whether It Is a Spot Price
+
+- [ ] Is it an instantaneous spot price?
+  - [ ] If yes → 🚨 potentially manipulable.
+
+## 3. Check Price Manipulation
+
+- [ ] Can an attacker move the DEX price temporarily?
+  - [ ] Is the pool low liquidity?
+  - [ ] Is a flash loan available?
+  - [ ] Can a large swap move the price significantly?
+
+## 4. Trace How the Price Is Used
+
+- [ ] What does the protocol do with the price?
+  - [ ] Liquidation
+  - [ ] Rebalance / reallocation
+  - [ ] Mint / burn
+  - [ ] Collateral valuation
+  - [ ] Borrowing limit
+  - [ ] Withdrawal / deposit decision
+  - [ ] Other financial action
+
+## 5. Look for a State Change
+
+- [ ] Does the price trigger a state-changing action?
+
+```text
+spot price
+    ↓
+condition
+    ↓
+state-changing action
+
+### Mitigation
+-> use TWAP instead of slot0 price.
