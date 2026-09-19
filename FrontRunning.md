@@ -39,3 +39,39 @@ The exchange rate/ share price is manipulated based on the current Underlying as
 -> prevent the rate/share exchange manipulation
 -> check the rounding error issue
 -> add the virtual shares so that exchange rate cannot be manipulated
+
+
+## PoC: Due to Plugin revert the slashing could not be initated.
+
+### Pattern
+state change front running
+
+### Root Cause
+Due IPlugin(plugin)._notifyStakeChangeAllPlugins() revert the slashing get reverted.
+
+### Assumption
+-> The IPlugin(plugin)._notifyStatkeChangeAllPlugins() will notify other plugins about the state change.
+-> . A registered plugin can change its internal state before
+   the slashing transaction executes.
+-> The target validator/account is genuinely eligible for slashing
+->The validator has a previously initiated withdrawal that can
+   become executable after the slashing attempt.
+
+### Broken Invariant
+-> All plugins that require notification must be notified when a stake change occurs.
+
+### Attack Story
+1. attacker initate the withdraw request.
+2. the slasher add the address
+3. attacker front run that 2nd request by adding the tx of changing the _noftufyStakeChangeAllPlugins state and front run it
+4. once slash() function get reverted
+5. attacker add another tx by changing the notify stake update of plgins
+6. then again at the small window , attacker withdraw the amount requested in step 1
+
+### Checklist
+[] check who control the external call?
+[] what if the external call get reverted?
+[] can the attacker control the external call and front run it?
+
+### Mitigation
+use try and catch in the external call (vip)
