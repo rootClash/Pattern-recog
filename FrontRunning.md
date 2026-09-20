@@ -75,3 +75,33 @@ Due IPlugin(plugin)._notifyStakeChangeAllPlugins() revert the slashing get rever
 
 ### Mitigation
 use try and catch in the external call (vip)
+
+
+## PoC: The `exchangeRateStored()` function allows front-running on repayments Union Finance Update
+
+### Pattern
+FrontRunning
+
+### Root Cause
+The attacker overseved the `totalRemedeable` state how it is changing in `_repayBorrowFresh()` in addition of it `exchangeRateStored()` ,`mint()`,`redeem()` also get affected.
+
+### Assumption
+-> Interest is split between protocol reserves and redeemable amount
+-> toRedeemableAmount <= interest
+-> totalRedeemable represents the portion of interest allocated to uToken holders.
+
+### Broken Invariant
+no invairnt has broked
+
+### Attack Story
+-> attacker mint the amout before the awaited tx with large repayment amount
+-> attacker put tx before the pending tx (front run) [totalRedeem increases]
+-> attacker then redem the amount because that [totalRedeem] increases in redeem function.
+
+### Checklist
+[]observe the state change in all the function
+[]does any state change is occuring in most of the function (observe that)
+[]does the forntrunning the function can encomical help the attacker
+
+### Mitigation
+An approach could be implementing TWAP in order to make front-running unprofitable in this situation. but this is not a proper remedation of front running However that profit attacker can be reduce in most excent.
