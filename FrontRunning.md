@@ -105,3 +105,32 @@ no invairnt has broked
 
 ### Mitigation
 An approach could be implementing TWAP in order to make front-running unprofitable in this situation. but this is not a proper remedation of front running However that profit attacker can be reduce in most excent.
+
+
+### Pattern:
+Victim transaction consumes mutable AMM state.
+
+### Attack:
+1. Victim submits finalize().
+2. Attacker sees transaction.
+3. Attacker trades against AMM.
+4. AMM state changes.
+5. Victim's finalize() executes.
+6. Function consumes manipulated state.
+7. Victim receives unexpected output.
+
+### Root cause:
+No minimum-output / slippage protection.
+
+### Key invariant:
+actualOutput >= minimumAcceptableOutput
+
+### Questions to ask:
+- What state does this function consume?
+- Can anyone modify that state before execution?
+- Is output bounded?
+- Is there min/max protection?
+- Is there a deadline?
+- Can state be locked?
+- Can another function unlock/change it?
+- Does pausing actually prevent pre-pause manipulation?
