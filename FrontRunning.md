@@ -134,3 +134,30 @@ actualOutput >= minimumAcceptableOutput
 - Can state be locked?
 - Can another function unlock/change it?
 - Does pausing actually prevent pre-pause manipulation?
+
+
+## PoC: Folio.bid()` strict sell amount causes DoS and auction execution loss
+
+### Pattern
+front running
+
+### Root Cause
+the maxSellAmount and minSellAmount was same (similat to no slippage protection)
+
+### Assumption
+The selleAmount remain same till it get executed
+
+### Broken Invariant
+The sellAmount change after execution
+
+### Attack Story
+[]user execute the bid on the fix sellAmount
+[]attacker make a request and front the run the user tx
+
+### Checklist
+[]check whether the fixed amount is used in execution.
+[]does the amount can be made revert?
+[]can anyone revert the function with amount param while front run?
+
+### Mitigation
+minSellAmount <= amount <= maxSellAmount (add the range) 
