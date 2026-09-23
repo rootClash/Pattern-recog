@@ -161,3 +161,60 @@ The sellAmount change after execution
 
 ### Mitigation
 minSellAmount <= amount <= maxSellAmount (add the range) 
+
+## PoC: Commit-reveal does not sufficiently protect against slash frontrunnings
+
+### Pattern
+commit-reveal dosen't protect from front running attack
+
+### Root Cause
+reveal() real the user parameter in mempool which is passed to match the hash value of the user given secret.
+
+### Assumption
+commitment == hash(privateKey, rewardRecipient)
+
+### Broken Invariant
+A revealed private key cannot be reused by another party to execute the slash and redirect the reward.
+
+### Attack Story
+Attacker front run the reveal function after keeping it eye on mempool. before the reveal() the attacker execute it transaction similar to the user (reveal function)
+
+### Checklist
+Does the reveal function can be frontrun ?
+Does the reveal function contain the other instruction to get executed?
+
+### Mitigation
+use internal function like slash() which will be called by the inherited contract or the current contract. but make sure that the child contract does not exploit that internal (slash()) function. becasue then attacker can use that child contract if ther is any wrapper to call that interal function. always check the PATH (VVIP)
+
+```
+contract Attacker is childContract {
+   function callFunction() public {
+      callSlash();  ----- 🛣️ to attack
+   }
+}
+
+
+contract RLN{
+   mapping(bytes32 => bool) private commited;
+
+   function commit(bytes32 _data) {
+      commited[bytes32] = true;
+   }
+
+   function reveal(address _user, bytes32 _pk){
+      bytes32 data = keccak256(abi.encode(_user , _pk));
+      require(commited[data] , "Commit hash does not exist");
+   }
+
+   function _slash() internal {
+      return true;
+   }
+}
+
+contract ChildContract is RLN{
+   function callSlash() external {
+      _slash() ❌ --> issue anyone can call this internal function
+   }
+}
+
+```
