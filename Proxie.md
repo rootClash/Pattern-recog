@@ -27,3 +27,27 @@ The fallaback address must always be trusted/valid handler for the Rental safe.
 ### Mitigation
 * use access control inside the setter function
 * valdiate the address to used inisde the fallaback function.
+
+## PoC: Initialization :
+Storage collision between the Proxie and Implementation contract
+
+### Pattern
+Storage collision
+
+### Root Cause
+Storage collsion due to not using EIP1967
+
+### Assumption
+Storage collison will not occur
+
+### Broken Invariant
+Stoage collision collided
+
+### Attack Story
+no POC or attack mentioned
+
+### Checklist
+[] check the storage in implementation and the Proxy contract with type
+
+### Mitigation
+To use EIP1967
