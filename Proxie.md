@@ -51,3 +51,29 @@ no POC or attack mentioned
 
 ### Mitigation
 To use EIP1967
+
+## PoC:  Holographable tokens can be reinitialized Holograph 
+
+### Pattern
+re initialization can be done
+
+### Root Cause
+The reentracy inside the initialization().
+
+### Assumption
+initialzation() can be called once.
+
+### Broken Invariant
+The initializon() can be called through reentrancy.
+
+### Attack Story
+1. attacker call iniatialize function
+2. use reentrancy in that function
+3. as the result reenter in that function and make changes
+4. again continue the same function
+
+### Checklist
+check whether initialize() uses OZ initializer library or not?
+
+### Mitigation
+use OZ initializer library function.
